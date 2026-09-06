@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Предзапись на тренинг — Егор Макшов</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap');
+
+  :root {
+    --bg: #FAF9F6;
+    --panel: #FFFFFF;
+    --panel-2: #F1EFEA;
+    --line: #E2DFD8;
+    --text: #17181A;
+    --muted: #6E7176;
+    --accent: #2547FF;
+    --accent-ink: #FFFFFF;
+    --old-strike: #ABAEB3;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', -apple-system, sans-serif;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 560px;
+    margin: 0 auto;
+    padding: 40px 20px 80px;
+  }
+
+  .brand {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 15px;
+    letter-spacing: 0.02em;
+    color: var(--muted);
+    margin-bottom: 36px;
+  }
+
+  h1 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 34px;
+    line-height: 1.12;
+    letter-spacing: -0.01em;
+    margin: 0 0 16px;
+  }
+
+  .lede {
+    font-size: 16px;
+    color: var(--muted);
+    margin: 0 0 32px;
+    max-width: 46ch;
+  }
+
+  .status {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 22px 24px;
+    margin-bottom: 36px;
+  }
+
+  .status-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 12px 0;
+  }
+
+  .status-row + .status-row {
+    border-top: 1px solid var(--line);
+  }
+
+  .status-label {
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .status-value {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 15px;
+    text-align: right;
+  }
+
+  .status-value.old {
+    color: var(--old-strike);
+    text-decoration: line-through;
+    text-decoration-thickness: 1.5px;
+    font-weight: 500;
+  }
+
+  .status-value.new {
+    color: var(--accent);
+  }
+
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+  }
+
+  .field label {
+    display: block;
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  .field input[type="text"],
+  .field input[type="tel"] {
+    width: 100%;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 14px 16px;
+    font-size: 16px;
+    color: var(--text);
+    font-family: inherit;
+    transition: border-color 0.15s ease;
+  }
+
+  .field input:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+
+  .field input::placeholder { color: #A9ACB1; }
+
+  .field .hint {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 6px;
+  }
+
+  .submit {
+    margin-top: 8px;
+    background: var(--accent);
+    color: var(--accent-ink);
+    border: none;
+    border-radius: 10px;
+    padding: 16px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: filter 0.15s ease;
+  }
+
+  .submit:hover { filter: brightness(1.08); }
+  .submit:disabled { opacity: 0.6; cursor: default; }
+
+  .error {
+    font-size: 13px;
+    color: #D6350C;
+    display: none;
+    margin-top: -8px;
+  }
+
+  .error.show { display: block; }
+
+  .success {
+    text-align: center;
+    padding: 60px 20px;
+  }
+
+  .success .check {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 24px;
+  }
+
+  .success h2 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 24px;
+    margin: 0 0 12px;
+  }
+
+  .success p {
+    color: var(--muted);
+    font-size: 15px;
+    max-width: 40ch;
+    margin: 0 auto;
+  }
+
+  .hidden { display: none !important; }
+
+  /* Admin view */
+  .admin-wrap {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 40px 20px 80px;
+  }
+
+  .admin-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 28px;
+  }
+
+  .admin-pill {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+
+  .admin-pill b {
+    color: var(--accent);
+    font-family: 'Space Grotesk', sans-serif;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+
+  th, td {
+    text-align: left;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  th {
+    color: var(--muted);
+    font-weight: 500;
+    font-size: 12px;
+  }
+
+  .empty-state {
+    color: var(--muted);
+    font-size: 14px;
+    padding: 20px 0;
+  }
+</style>
+</head>
+<body>
+
+<div id="formView" class="wrap">
+  <div class="brand">Анкета предзаписи на тренинг Егора Макшова</div>
+
+  <form id="signupForm">
+    <div class="field">
+      <label for="fullname">Имя и фамилия</label>
+      <input type="text" id="fullname" name="fullname" placeholder="Иван Иванов" autocomplete="name">
+      <div class="error" id="err-fullname">Укажите имя и фамилию</div>
+    </div>
+
+    <div class="field">
+      <label for="phone">Номер телефона</label>
+      <input type="tel" id="phone" name="phone" placeholder="+7 900 000-00-00" autocomplete="tel">
+      <div class="error" id="err-phone">Укажите номер телефона</div>
+    </div>
+
+    <div class="field">
+      <label for="tg">Ник в Telegram</label>
+      <input type="text" id="tg" name="tg" placeholder="@username" autocomplete="off">
+      <div class="error" id="err-tg">Укажите ник в Telegram</div>
+    </div>
+
+    <div class="field">
+      <label for="date">Желаемая дата</label>
+      <input type="text" id="date" name="date" placeholder="Например, 19 сентября">
+      <div class="error" id="err-date">Укажите желаемую дату</div>
+    </div>
+
+    <button type="submit" class="submit" id="submitBtn">Записаться</button>
+  </form>
+</div>
+
+<div id="successView" class="wrap success hidden">
+  <div class="check">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <path d="M5 13L9 17L19 7" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div>
+  <h2>Заявка принята</h2>
+  <p>Дата и все детали тренинга придут в личные сообщения, как только наберётся группа.</p>
+</div>
+
+<div id="adminView" class="admin-wrap hidden">
+  <div class="brand">Заявки на тренинг</div>
+  <div class="admin-summary" id="adminSummary"></div>
+  <div id="adminTableWrap"></div>
+</div>
+
+<script>
+(function () {
+  const isAdmin = new URLSearchParams(location.search).get('admin') === 'maksho';
+  const formView = document.getElementById('formView');
+  const successView = document.getElementById('successView');
+  const adminView = document.getElementById('adminView');
+
+  if (isAdmin) {
+    formView.classList.add('hidden');
+    renderAdmin();
+    return;
+  }
+
+  const form = document.getElementById('signupForm');
+  const submitBtn = document.getElementById('submitBtn');
+
+  function clearErrors() {
+    document.querySelectorAll('.error').forEach(e => e.classList.remove('show'));
+  }
+
+  function showError(id) {
+    const el = document.getElementById(id);
+    if (el) el.classList.add('show');
+  }
+
+  form.addEventListener('submit', async function (e) {
+    e.preventDefault();
+    clearErrors();
+
+    const fullname = document.getElementById('fullname').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    const tg = document.getElementById('tg').value.trim();
+    const dateValue = document.getElementById('date').value.trim();
+
+    let valid = true;
+    if (!fullname) { showError('err-fullname'); valid = false; }
+    if (!phone) { showError('err-phone'); valid = false; }
+    if (!tg) { showError('err-tg'); valid = false; }
+    if (!dateValue) { showError('err-date'); valid = false; }
+    if (!valid) return;
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Отправляем...';
+
+    const entry = {
+      fullname, phone, tg, date: dateValue,
+      ts: new Date().toISOString()
+    };
+
+    try {
+      const key = 'signup:' + Date.now() + '-' + Math.random().toString(36).slice(2, 8);
+      const result = await window.storage.set(key, JSON.stringify(entry), true);
+      if (!result) throw new Error('Storage returned null');
+      formView.classList.add('hidden');
+      successView.classList.remove('hidden');
+    } catch (err) {
+      console.error('Storage error:', err);
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Записаться';
+      alert('Не удалось отправить заявку. Попробуйте ещё раз.');
+    }
+  });
+
+  async function renderAdmin() {
+    adminView.classList.remove('hidden');
+    const summaryEl = document.getElementById('adminSummary');
+    const tableWrap = document.getElementById('adminTableWrap');
+
+    let keysResult;
+    try {
+      keysResult = await window.storage.list('signup:', true);
+    } catch (err) {
+      tableWrap.innerHTML = '<div class="empty-state">Не удалось загрузить заявки.</div>';
+      return;
+    }
+
+    const keys = (keysResult && keysResult.keys) || [];
+    if (keys.length === 0) {
+      summaryEl.innerHTML = '<div class="admin-pill"><b>0</b> заявок пока нет</div>';
+      tableWrap.innerHTML = '<div class="empty-state">Как только кто-то заполнит анкету, заявка появится здесь.</div>';
+      return;
+    }
+
+    const entries = [];
+    for (const key of keys) {
+      try {
+        const res = await window.storage.get(key, true);
+        if (res && res.value) entries.push(JSON.parse(res.value));
+      } catch (err) {
+        // skip unreadable entry
+      }
+    }
+
+    entries.sort((a, b) => new Date(b.ts) - new Date(a.ts));
+
+    const byDate = {};
+    entries.forEach(e => { byDate[e.date] = (byDate[e.date] || 0) + 1; });
+
+    let summaryHtml = `<div class="admin-pill"><b>${entries.length}</b> всего заявок</div>`;
+    Object.entries(byDate)
+      .sort((a, b) => b[1] - a[1])
+      .forEach(([date, count]) => {
+        summaryHtml += `<div class="admin-pill">${escapeHtml(date)} — <b>${count}</b></div>`;
+      });
+    summaryEl.innerHTML = summaryHtml;
+
+    let rows = entries.map(e => `
+      <tr>
+        <td>${escapeHtml(e.fullname || '')}</td>
+        <td>${escapeHtml(e.phone || '')}</td>
+        <td>${escapeHtml(e.tg || '')}</td>
+        <td>${escapeHtml(e.date || '')}</td>
+        <td>${new Date(e.ts).toLocaleString('ru-RU')}</td>
+      </tr>
+    `).join('');
+
+    tableWrap.innerHTML = `
+      <table>
+        <thead>
+          <tr><th>Имя</th><th>Телефон</th><th>Telegram</th><th>Дата</th><th>Когда отправлено</th></tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    `;
+  }
+
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+})();
+</script>
+
+</body>
+</html>
