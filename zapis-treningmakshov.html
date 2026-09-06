@@ -296,26 +296,11 @@
   <p>Дата и все детали тренинга придут в личные сообщения, как только наберётся группа.</p>
 </div>
 
-<div id="adminView" class="admin-wrap hidden">
-  <div class="brand">Заявки на тренинг</div>
-  <div class="admin-summary" id="adminSummary"></div>
-  <div id="adminTableWrap"></div>
-</div>
-
 <script>
 (function () {
   const SHEET_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz23dQCbdrZ9UyW2-OcAxyAY2alBwtF2Epo71IB_enzc8NSzBw5Uh8wvFLVSVLXK58TlA/exec';
-  const isAdmin = new URLSearchParams(location.search).get('admin') === 'maksho';
   const formView = document.getElementById('formView');
   const successView = document.getElementById('successView');
-  const adminView = document.getElementById('adminView');
-
-  if (isAdmin) {
-    formView.classList.add('hidden');
-    renderAdmin();
-    return;
-  }
-
   const form = document.getElementById('signupForm');
   const submitBtn = document.getElementById('submitBtn');
 
@@ -353,97 +338,23 @@
     };
 
     try {
-      const key = 'signup:' + Date.now() + '-' + Math.random().toString(36).slice(2, 8);
-      const result = await window.storage.set(key, JSON.stringify(entry), true);
-      if (!result) throw new Error('Storage returned null');
-
-      // Отправляем также в Google Таблицу. no-cors не даёт проверить ответ,
-      // поэтому это не блокирует и не может провалить основную отправку.
-      fetch(SHEET_SCRIPT_URL, {
+      // no-cors не даёт прочитать ответ, поэтому просто отправляем и
+      // считаем успехом сам факт отсутствия сетевой ошибки при отправке.
+      await fetch(SHEET_SCRIPT_URL, {
         method: 'POST',
         mode: 'no-cors',
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify(entry)
-      }).catch(err => console.error('Sheet sync error:', err));
-
+      });
       formView.classList.add('hidden');
       successView.classList.remove('hidden');
     } catch (err) {
-      console.error('Storage error:', err);
+      console.error('Sheet sync error:', err);
       submitBtn.disabled = false;
       submitBtn.textContent = 'Записаться';
-      alert('Не удалось отправить заявку. Попробуйте ещё раз.');
+      alert('Не удалось отправить заявку. Проверьте соединение и попробуйте ещё раз.');
     }
   });
-
-  async function renderAdmin() {
-    adminView.classList.remove('hidden');
-    const summaryEl = document.getElementById('adminSummary');
-    const tableWrap = document.getElementById('adminTableWrap');
-
-    let keysResult;
-    try {
-      keysResult = await window.storage.list('signup:', true);
-    } catch (err) {
-      tableWrap.innerHTML = '<div class="empty-state">Не удалось загрузить заявки.</div>';
-      return;
-    }
-
-    const keys = (keysResult && keysResult.keys) || [];
-    if (keys.length === 0) {
-      summaryEl.innerHTML = '<div class="admin-pill"><b>0</b> заявок пока нет</div>';
-      tableWrap.innerHTML = '<div class="empty-state">Как только кто-то заполнит анкету, заявка появится здесь.</div>';
-      return;
-    }
-
-    const entries = [];
-    for (const key of keys) {
-      try {
-        const res = await window.storage.get(key, true);
-        if (res && res.value) entries.push(JSON.parse(res.value));
-      } catch (err) {
-        // skip unreadable entry
-      }
-    }
-
-    entries.sort((a, b) => new Date(b.ts) - new Date(a.ts));
-
-    const byDate = {};
-    entries.forEach(e => { byDate[e.date] = (byDate[e.date] || 0) + 1; });
-
-    let summaryHtml = `<div class="admin-pill"><b>${entries.length}</b> всего заявок</div>`;
-    Object.entries(byDate)
-      .sort((a, b) => b[1] - a[1])
-      .forEach(([date, count]) => {
-        summaryHtml += `<div class="admin-pill">${escapeHtml(date)} — <b>${count}</b></div>`;
-      });
-    summaryEl.innerHTML = summaryHtml;
-
-    let rows = entries.map(e => `
-      <tr>
-        <td>${escapeHtml(e.fullname || '')}</td>
-        <td>${escapeHtml(e.phone || '')}</td>
-        <td>${escapeHtml(e.tg || '')}</td>
-        <td>${escapeHtml(e.date || '')}</td>
-        <td>${new Date(e.ts).toLocaleString('ru-RU')}</td>
-      </tr>
-    `).join('');
-
-    tableWrap.innerHTML = `
-      <table>
-        <thead>
-          <tr><th>Имя</th><th>Телефон</th><th>Telegram</th><th>Дата</th><th>Когда отправлено</th></tr>
-        </thead>
-        <tbody>${rows}</tbody>
-      </table>
-    `;
-  }
-
-  function escapeHtml(str) {
-    const div = document.createElement('div');
-    div.textContent = str;
-    return div.innerHTML;
-  }
 })();
 </script>
 
