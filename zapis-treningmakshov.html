@@ -304,6 +304,7 @@
 
 <script>
 (function () {
+  const SHEET_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz23dQCbdrZ9UyW2-OcAxyAY2alBwtF2Epo71IB_enzc8NSzBw5Uh8wvFLVSVLXK58TlA/exec';
   const isAdmin = new URLSearchParams(location.search).get('admin') === 'maksho';
   const formView = document.getElementById('formView');
   const successView = document.getElementById('successView');
@@ -355,6 +356,16 @@
       const key = 'signup:' + Date.now() + '-' + Math.random().toString(36).slice(2, 8);
       const result = await window.storage.set(key, JSON.stringify(entry), true);
       if (!result) throw new Error('Storage returned null');
+
+      // Отправляем также в Google Таблицу. no-cors не даёт проверить ответ,
+      // поэтому это не блокирует и не может провалить основную отправку.
+      fetch(SHEET_SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(entry)
+      }).catch(err => console.error('Sheet sync error:', err));
+
       formView.classList.add('hidden');
       successView.classList.remove('hidden');
     } catch (err) {
